@@ -309,10 +309,10 @@ function onConnectedHandler (addr, port) {
         ! videoscale n-threads=2
         ! queue
         ! videorate
-        ! video/x-raw,width=1280,height=720,framerate=30/1,pixel-aspect-ratio=1/1
+        ! video/x-raw,width=848,height=480,framerate=30/1,pixel-aspect-ratio=1/1
         ! queue
         ! x264enc
-            bitrate=3000
+            bitrate=1600
             key-int-max=60
             speed-preset=1
             tune=zerolatency
