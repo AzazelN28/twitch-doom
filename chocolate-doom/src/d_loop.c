@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "collabdoom.h"
+#include "twitchdoom.h"
 
 #include "d_event.h"
 #include "d_loop.h"
@@ -150,7 +150,7 @@ static boolean BuildNewTic(void)
     // Esta función obtiene todo el comportamiento
     // a partir de ratón, teclado y joystick.
     I_StartTic ();
-    CollabDOOM_Tic ();
+    TwitchDOOM_Tic ();
 
     loop_interface->ProcessEvents();
 

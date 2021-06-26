@@ -62,6 +62,7 @@ d_event.c            d_event.h             \
                      doomtype.h            \
 d_iwad.c             d_iwad.h              \
 d_loop.c             d_loop.h              \
+twitchdoom.c	     twitchdoom.h	   \
 d_mode.c             d_mode.h              \
                      d_ticcmd.h            \
 deh_str.c            deh_str.h             \

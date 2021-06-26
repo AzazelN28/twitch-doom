@@ -1,4 +1,4 @@
-#include "collabdoom.h"
+#include "twitchdoom.h"
 
 #include "d_event.h"
 #include "d_ticcmd.h"
@@ -17,7 +17,7 @@ static unsigned int namelen;
 static ssize_t readlen;
 static int fd = -1;
 
-void CollabDOOM_Tic() {
+void TwitchDOOM_Tic() {
 
   if (!state) {
     state = IS_RUNNING;

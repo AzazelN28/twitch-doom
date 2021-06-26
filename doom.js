@@ -193,7 +193,7 @@ twitchClient.connect();
 
 // Llamado cada vez que llega un mensaje al chat.
 function onMessageHandler (channel, tags, msg, self) {
-  log(self, msg)
+  //log(self, msg)
   // Ignoramos los mensajes del bot.
   if (self || !msg.startsWith('!')) {
     return
@@ -204,7 +204,7 @@ function onMessageHandler (channel, tags, msg, self) {
     return
   }
 
-  log(channel, tags, msg, self)
+  //log(channel, tags, msg, self)
   const commandName = msg.trim();
   const commandList = [
     '!forward',
@@ -213,6 +213,7 @@ function onMessageHandler (channel, tags, msg, self) {
     '!turnright',
     '!strafeleft',
     '!straferight',
+    '!shoot',
     '!fire',
     '!use',
     '!start',
@@ -227,7 +228,7 @@ function onMessageHandler (channel, tags, msg, self) {
     '!s'
   ]
   if (commandList.includes(commandName)) {
-    log('Executing', commandName)
+    // log('Executing', commandName)
     // twitchClient.say(channel, `@${tags.username} running command ${commandName.substr(1)}`)
     // data1: Bitfield of buttons currently pressed.
     // data2: X axis mouse movement (turn).
@@ -241,7 +242,7 @@ function onMessageHandler (channel, tags, msg, self) {
       case '!r': case '!turnright': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,0,DoomJoystickAxis.NEGATIVE,0,0,0])); break;
       case '!sl': case '!strafeleft': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,0,0,0,DoomJoystickAxis.POSITIVE,0])); break;
       case '!sr': case '!straferight': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,0,0,0,DoomJoystickAxis.NEGATIVE,0])); break;
-      case '!s': case '!fire': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,DoomJoystickButton.A,0,0,0,0])); break;
+      case '!s': case '!shoot': case '!fire': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,DoomJoystickButton.A,0,0,0,0])); break;
       case '!u': case '!use': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,DoomJoystickButton.B,0,0,0,0])); break;
       case '!stop': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,0,0,0,0,0])); break;
     }
@@ -266,7 +267,7 @@ function onConnectedHandler (addr, port) {
   })
 
   doom.on('close', (code, signal) => {
-    console.log(code, signal)
+    console.log('DOOM Closed', code, signal)
   })
 
   // Necesitamos esperar a que el DOOM esté listo, así que esperamos un poquito
@@ -275,22 +276,24 @@ function onConnectedHandler (addr, port) {
 
     // Obtenemos la información de la ventana del DOOM.
     cp.exec('xwininfo -name "DOOM Shareware - Chocolate Doom 3.0.0"', (err, stdout, stderr) => {
-      const matches = stdout.match(/-geometry (?<width>[0-9]+)x(?<height>[0-9]+)\+(?<x>[0-9]+)-(?<y>[0-9]+)/)
+      log(stdout)
+      const matches = stdout.match(/-geometry\s+(?<width>[0-9]+)x(?<height>[0-9]+)[-+](?<x>[0-9]+)[-+](?<y>[0-9]+)/)
+      log(matches)
       if (!matches) {
-
-        process.exit(1)
+	doom.kill('SIGINT')
+        log('Killing DOOM')
+        return process.exit(1)
       }
 
       const width = parseInt(matches.groups.width, 10)
       const height = parseInt(matches.groups.height, 10)
-      const x = parseInt(matches.groups.x, 10) + 10
-      const y = parseInt(matches.groups.y, 10) + 93
+      const x = parseInt(matches.groups.x, 10) + 1
+      const y = parseInt(matches.groups.y, 10) + 29
       const location = `rtmp://mad.contribute.live-video.net/app/${process.env.TWITCH_STREAM_KEY}`
 
       const gstreamerPipeline = `flvmux
         name=mux
         streamable=true
-        encoder="Twitch DOOM"
         metadatacreator="Twitch DOOM"
         ! queue
         ! rtmpsink location=${location}
@@ -301,9 +304,9 @@ function onConnectedHandler (addr, port) {
           endy=${y+height}
           use-damage=0
         ! queue
-        ! videoconvert
+        ! videoconvert n-threads=2
         ! queue
-        ! videoscale
+        ! videoscale n-threads=2
         ! queue
         ! videorate
         ! video/x-raw,width=1280,height=720,framerate=30/1,pixel-aspect-ratio=1/1
@@ -311,11 +314,11 @@ function onConnectedHandler (addr, port) {
         ! x264enc
             bitrate=3000
             key-int-max=60
-            speed-preset=6
+            speed-preset=1
             tune=zerolatency
         ! video/x-h264,profile=main
         ! mux.
-        pulsesrc device="alsa_output.usb-Logitech_G935_Gaming_Headset-00.iec958-stereo.monitor"
+        pulsesrc device="alsa_output.platform-bcm2835_audio.digital-stereo.monitor"
         ! queue
         ! audioconvert
         ! queue
@@ -329,6 +332,10 @@ function onConnectedHandler (addr, port) {
         '-v', ...gstreamerPipeline
       ], {
         stdio: process.env.TWITCH_DOOM_DEBUG_STDIO ? 'inherit' : null
+      })
+
+      gstreamer.on('close', (code, signal) => {
+	log('GStreamer closed', code, signal)
       })
 
     })
