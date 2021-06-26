@@ -3,13 +3,14 @@ const cp = require('child_process')
 const dgram = require('dgram')
 const debug = require('debug')
 const dotenv = require('dotenv')
+const fetch = require('node-fetch')
 dotenv.config()
 
 const log = debug('log')
 const error = debug('error')
 
 // Define configuration options
-const opts = {
+const twitchClientOptions = {
   identity: {
     username: process.env.TWITCH_CHATBOT_USERNAME,
     password: process.env.TWITCH_CHATBOT_OAUTH_TOKEN
@@ -21,7 +22,9 @@ const opts = {
 
 const DoomJoystickAxis = {
   POSITIVE: -256,
-  NEGATIVE: 256
+  NEGATIVE: 256,
+  SUPER_POSITIVE: -1024,
+  SUPER_NEGATIVE: 1024,
 }
 
 const DoomJoystickButton = {
@@ -48,37 +51,37 @@ const DoomEventType = {
 // This is the stuff configured by Setup.Exe.
 // Most key data are simple ascii (uppercased).
 //
-#define KEY_RIGHTARROW	0xae
-#define KEY_LEFTARROW	0xac
-#define KEY_UPARROW	0xad
-#define KEY_DOWNARROW	0xaf
-#define KEY_ESCAPE	27
-#define KEY_ENTER	13
-#define KEY_TAB		9
-#define KEY_F1		(0x80+0x3b)
-#define KEY_F2		(0x80+0x3c)
-#define KEY_F3		(0x80+0x3d)
-#define KEY_F4		(0x80+0x3e)
-#define KEY_F5		(0x80+0x3f)
-#define KEY_F6		(0x80+0x40)
-#define KEY_F7		(0x80+0x41)
-#define KEY_F8		(0x80+0x42)
-#define KEY_F9		(0x80+0x43)
-#define KEY_F10		(0x80+0x44)
-#define KEY_F11		(0x80+0x57)
-#define KEY_F12		(0x80+0x58)
+#define KEY_RIGHTARROW  0xae
+#define KEY_LEFTARROW   0xac
+#define KEY_UPARROW     0xad
+#define KEY_DOWNARROW   0xaf
+#define KEY_ESCAPE      27
+#define KEY_ENTER       13
+#define KEY_TAB         9
+#define KEY_F1          (0x80+0x3b)
+#define KEY_F2          (0x80+0x3c)
+#define KEY_F3          (0x80+0x3d)
+#define KEY_F4          (0x80+0x3e)
+#define KEY_F5          (0x80+0x3f)
+#define KEY_F6          (0x80+0x40)
+#define KEY_F7          (0x80+0x41)
+#define KEY_F8          (0x80+0x42)
+#define KEY_F9          (0x80+0x43)
+#define KEY_F10         (0x80+0x44)
+#define KEY_F11         (0x80+0x57)
+#define KEY_F12         (0x80+0x58)
 
-#define KEY_BACKSPACE	0x7f
-#define KEY_PAUSE	0xff
+#define KEY_BACKSPACE   0x7f
+#define KEY_PAUSE       0xff
 
-#define KEY_EQUALS	0x3d
-#define KEY_MINUS	0x2d
+#define KEY_EQUALS      0x3d
+#define KEY_MINUS       0x2d
 
-#define KEY_RSHIFT	(0x80+0x36)
-#define KEY_RCTRL	(0x80+0x1d)
-#define KEY_RALT	(0x80+0x38)
+#define KEY_RSHIFT      (0x80+0x36)
+#define KEY_RCTRL       (0x80+0x1d)
+#define KEY_RALT        (0x80+0x38)
 
-#define KEY_LALT	KEY_RALT
+#define KEY_LALT        KEY_RALT
 
 // new keys:
 
@@ -181,7 +184,7 @@ const doomEvents = []
 const doomClient = dgram.createSocket('udp4')
 
 // Create a client with our options
-const twitchClient = new tmi.client(opts)
+const twitchClient = new tmi.client(twitchClientOptions)
 
 // Register our event handlers (defined below)
 twitchClient.on('message', onMessageHandler)
@@ -207,26 +210,27 @@ function onMessageHandler (channel, tags, msg, self) {
   //log(channel, tags, msg, self)
   const commandName = msg.trim();
   const commandList = [
-    '!forward',
-    '!backward',
-    '!turnleft',
-    '!turnright',
-    '!strafeleft',
-    '!straferight',
-    '!shoot',
-    '!fire',
-    '!use',
-    '!start',
-    '!stop',
-    '!f',
-    '!b',
-    '!l',
-    '!r',
-    '!sl',
-    '!sr',
-    '!u',
-    '!s'
+    '!h','!help',
+    '!f','!forward',
+    '!b','!backward',
+    '!l','!tl','!turnleft',
+    '!r','!tr','!turnright',
+    '!sl','!strafeleft',
+    '!sr','!straferight',
+    '!s','!shoot','!fire',
+    '!u','!use',
+    '!a','!m','!map','!automap',
+    '!1','!fist',
+    '!2','!pistol',
+    '!3','!shotgun',
+    '!4','!chaingun',
+    '!5','!rocket',
+    '!6','!plasma',
+    '!7','!bfg',
+    '!iddqd',
+    '!idkfa'
   ]
+
   if (commandList.includes(commandName)) {
     // log('Executing', commandName)
     // twitchClient.say(channel, `@${tags.username} running command ${commandName.substr(1)}`)
@@ -236,16 +240,56 @@ function onMessageHandler (channel, tags, msg, self) {
     // data4: Third axis mouse movement (strafe).
     // data5: Fourth axis mouse movement (look)
     switch (commandName) {
+      case '!h': case '!help':
+        twitchClient.say(channel, `@${tags.username} to play you can use:`)
+        break
       case '!f': case '!forward': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,0,0,DoomJoystickAxis.POSITIVE,0,0])); break;
       case '!b': case '!backward': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,0,0,DoomJoystickAxis.NEGATIVE,0,0])); break;
-      case '!l': case '!turnleft': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,0,DoomJoystickAxis.POSITIVE,0,0,0])); break;
-      case '!r': case '!turnright': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,0,DoomJoystickAxis.NEGATIVE,0,0,0])); break;
+      case '!l': case '!tl': case '!turnleft': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,0,DoomJoystickAxis.POSITIVE,0,0,0])); break;
+      case '!r': case '!tr': case '!turnright': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,0,DoomJoystickAxis.NEGATIVE,0,0,0])); break;
       case '!sl': case '!strafeleft': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,0,0,0,DoomJoystickAxis.POSITIVE,0])); break;
       case '!sr': case '!straferight': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,0,0,0,DoomJoystickAxis.NEGATIVE,0])); break;
       case '!s': case '!shoot': case '!fire': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,DoomJoystickButton.A,0,0,0,0])); break;
       case '!u': case '!use': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,DoomJoystickButton.B,0,0,0,0])); break;
-      case '!stop': doomEvents.push(new Int32Array([DoomEventType.JOYSTICK,0,0,0,0,0])); break;
+      case '!a': case '!m': case '!map': case '!automap': 
+        //doomEvents.push(new Int32Array([DoomEventType.KEY_DOWN,43,0,0,0,0]))
+        doomEvents.push(new Int32Array([DoomEventType.KEY_UP,43,0,0,0,0]))
+        break
+      case '!1': case '!fist': 
+        //doomEvents.push(new Int32Array([DoomEventType.KEY_DOWN,30,0,0,0,0])) 
+        doomEvents.push(new Int32Array([DoomEventType.KEY_UP,30,0,0,0,0]))
+        break
+      case '!2': case '!pistol':
+        //doomEvents.push(new Int32Array([DoomEventType.KEY_DOWN,31,0,0,0,0])) 
+        doomEvents.push(new Int32Array([DoomEventType.KEY_UP,31,0,0,0,0]))
+        break
+      case '!3': case '!shotgun':
+        //doomEvents.push(new Int32Array([DoomEventType.KEY_DOWN,32,0,0,0,0])) 
+        doomEvents.push(new Int32Array([DoomEventType.KEY_UP,32,0,0,0,0]))
+        break
+      case '!4': case '!chaingun':
+        //doomEvents.push(new Int32Array([DoomEventType.KEY_DOWN,33,0,0,0,0])) 
+        doomEvents.push(new Int32Array([DoomEventType.KEY_UP,33,0,0,0,0]))
+        break
+      case '!5': case '!rocket':
+        //doomEvents.push(new Int32Array([DoomEventType.KEY_DOWN,34,0,0,0,0])) 
+        doomEvents.push(new Int32Array([DoomEventType.KEY_UP,34,0,0,0,0]))
+        break
+      case '!6': case '!plasma':
+        //doomEvents.push(new Int32Array([DoomEventType.KEY_DOWN,35,0,0,0,0])) 
+        doomEvents.push(new Int32Array([DoomEventType.KEY_UP,35,0,0,0,0]))
+        break
+      case '!7': case '!bfg':
+        //doomEvents.push(new Int32Array([DoomEventType.KEY_DOWN,36,0,0,0,0])) 
+        doomEvents.push(new Int32Array([DoomEventType.KEY_UP,36,0,0,0,0]))
+        break
+      case '!iddqd':
+      case '!idkfa':
+        twitchClient.say(channel, `@${tags.username} nice try. ;)`)
+        break
     }
+  } else {
+    // TODO: Podemos intentar parsear cosas como !f25
   }
 }
 
@@ -265,23 +309,32 @@ function onConnectedHandler (addr, port) {
   const doom = cp.spawn('./bin/doom', ['-iwad', './bin/doom1.wad'], {
     stdio: process.env.TWITCH_DOOM_DEBUG_STDIO ? 'inherit' : null
   })
-
+  
   doom.on('close', (code, signal) => {
-    console.log('DOOM Closed', code, signal)
+    // TODO: Esto tendría que notificarme que todo ha petado.
+    log('DOOM Closed', code, signal)
   })
 
   // Necesitamos esperar a que el DOOM esté listo, así que esperamos un poquito
   // y continuamos.
   setTimeout(() => {
+    log('DOOM should be running')
 
     // Obtenemos la información de la ventana del DOOM.
-    cp.exec('xwininfo -name "DOOM Shareware - Chocolate Doom 3.0.0"', (err, stdout, stderr) => {
+    cp.exec('xwininfo -name "DOOM Shareware - Chocolate Doom 3.0.0"', async (err, stdout, stderr) => {
+      if (err) {
+        log('Cannot exec xwininfo')
+	doom.kill('SIGINT')
+	return
+      }
+
       log(stdout)
       const matches = stdout.match(/-geometry\s+(?<width>[0-9]+)x(?<height>[0-9]+)[-+](?<x>[0-9]+)[-+](?<y>[0-9]+)/)
       log(matches)
       if (!matches) {
-	doom.kill('SIGINT')
+        doom.kill('SIGINT')
         log('Killing DOOM')
+	await postSlack({ text: 'GStreamer unexpectedly closed' })
         return process.exit(1)
       }
 
@@ -334,8 +387,18 @@ function onConnectedHandler (addr, port) {
         stdio: process.env.TWITCH_DOOM_DEBUG_STDIO ? 'inherit' : null
       })
 
-      gstreamer.on('close', (code, signal) => {
-	log('GStreamer closed', code, signal)
+      gstreamer.on('close', async (code, signal) => {
+        log('GStreamer closed', code, signal)
+	await notify({ text: 'GStreamer unexpectedly closed' })
+	doom.kill('SIGINT')
+	process.exit(1)
+      })
+
+      doom.on('close', async (code, signal) => {
+	log('DOOM closed', code, signal)
+        await notify({ text: 'DOOM unexpectedly closed' })	
+	gstreamer.kill('SIGINT')
+	process.exit(1)
       })
 
     })
