@@ -1,0 +1,24 @@
+{
+  "name": "twitch-doom",
+  "version": "1.0.0",
+  "description": "",
+  "main": "doom.js",
+  "scripts": {
+    "start": "node doom.js",
+    "start:dev": "nodemon doom.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "AzazelN28 <asakon28@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "debug": "^4.3.1",
+    "dotenv": "^10.0.0",
+    "node-fetch": "^2.6.1",
+    "tmi.js": "^1.8.3"
+  },
+  "devDependencies": {
+    "eslint": "^7.29.0",
+    "nodemon": "^2.0.7"
+  }
+}
