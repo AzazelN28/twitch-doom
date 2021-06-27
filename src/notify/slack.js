@@ -1,18 +1,18 @@
 import fetch from 'node-fetch'
 
 /**
- * Envia
- *
+ * Sends a notification using Slack's Incoming Webhooks.
+ * @param {*} data
+ * @returns {Promise<Response|Error>}
  */
-export async function notify(data) {
-  const response = await fetch(process.env.TWITCH_DOOM_SLACK_WEBHOOK, {
+export function notify(data) {
+  return fetch(process.env.TWITCH_DOOM_SLACK_WEBHOOK, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(data)
   })
-  return response.json()
 }
 
 export default {

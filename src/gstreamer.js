@@ -3,6 +3,25 @@ import debug from 'debug'
 
 const log = debug('twitchdoom:gstreamer')
 
+/**
+ * GStreamer options
+ *
+ * TODO: Maybe in the future we can specify more options like x264enc options: bitrate, speed-preset, etc.
+ *
+ * @typedef {Object} GStreamerOptions
+ * @property {number} x X coordinate
+ * @property {number} y Y coordinate
+ * @property {number} width Width
+ * @property {number} height Height
+ * @property {string} location RTMP location
+ */
+
+/**
+ * Starts GStreamer live streaming using ximagesrc coordinates and
+ * RTMP location.
+ * @param {GStreamerOptions} options
+ * @returns {ChildProcess}
+ */
 export function start({ x, y, width, height, location }) {
   const gstreamerPipeline = `flvmux
     name=mux
@@ -41,13 +60,9 @@ export function start({ x, y, width, height, location }) {
     `.split(/\s+/g)
 
   log('Gstreamer', 'gst-launch-1.0', '-v', ...gstreamerPipeline)
+
   const gstreamer = cp.spawn('gst-launch-1.0', ['-v', ...gstreamerPipeline], {
     stdio: process.env.TWITCH_DOOM_DEBUG_STDIO ? 'inherit' : null
-  })
-
-  gstreamer.on('close', async (code, signal) => {
-    log('GStreamer closed', code, signal)
-    await notify({ text: 'GStreamer unexpectedly closed' })
   })
 
   return gstreamer

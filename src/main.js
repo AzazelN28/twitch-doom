@@ -1,10 +1,17 @@
 import debug from 'debug'
 import doom from './doom'
 import watcher from './watcher'
+import twitch from './twitch'
+import time from './time'
+import xwininfo from './xwininfo'
+import gstreamer from './gstreamer'
 import { notify } from './notify/slack'
 
 const log = debug('twitchdoom')
 
+/**
+ * Main
+ */
 export default function main() {
   const client = twitch.connect({
     identity: {
@@ -28,13 +35,13 @@ export default function main() {
       )
     }
 
-    const commandName = msg.trim()
+    const commandName = msg.trim().toLowerCase()
     const commandList = [
       '!h', '!help',
       '!f', '!forward',
       '!b', '!backward',
-      '!l', '!tl', '!turnleft',
-      '!r', '!tr', '!turnright',
+      '!l', '!tl', '!left', '!turnleft',
+      '!r', '!tr', '!right', '!turnright',
       '!sl', '!strafeleft',
       '!sr', '!straferight',
       '!s', '!shoot', '!fire',
@@ -60,11 +67,11 @@ export default function main() {
       // data4: Third axis mouse movement (strafe).
       // data5: Fourth axis mouse movement (look)
       switch (commandName) {
-        case '!h': case '!help': return client.say(channel, `@${tags.username} to play you can use:`)
+        case '!h': case '!help': return client.say(channel, `@${tags.username} to move you can use !forward, !backward, !turnleft, !turnright, !strafeleft, !straferight or its shortcut version: !f, !b, !l, !r, !sl, !sr, to shoot use !shoot (or !s or !fire) and to use !use (or !u). You can change weapon with numbers !1,!2,!3,!4,!5,!6,!7 or by its name: !fist, !pistol, !shotgun, !chaingun, !rocket, !plasma or !bfg.`)
         case '!f': case '!forward': return doom.forward()
         case '!b': case '!backward': return doom.backward()
-        case '!l': case '!tl': case '!turnleft': return doom.turnLeft()
-        case '!r': case '!tr': case '!turnright': return doom.turnRight()
+        case '!l': case '!tl': case '!left': case '!turnleft': return doom.turnLeft()
+        case '!r': case '!tr': case '!right': case '!turnright': return doom.turnRight()
         case '!sl': case '!strafeleft': return doom.strafeLeft()
         case '!sr': case '!straferight': return doom.strafeRight()
         case '!s': case '!shoot': case '!fire': return doom.shoot()
@@ -96,7 +103,13 @@ export default function main() {
     log('Retrieving X window info')
     const { x, y, width, height } = await xwininfo.getInfo()
     log('Starting GStreamer pipeline')
-    watcher.watch(gstreamer.start({ x: x + 1, y: y + 29, width, height }))
+    watcher.watch(gstreamer.start({ 
+      x: x + 1, 
+      y: y + 29, 
+      width, 
+      height,
+      location: `rtmp://mad.contribute.live-video.net/app/${process.env.TWITCH_STREAM_KEY}`
+    }))
     log('Initializing DOOM input loop')
     doom.init()
   })

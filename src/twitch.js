@@ -10,3 +10,7 @@ export function connect(options) {
   client.connect()
   return client
 }
+
+export default {
+  connect
+}

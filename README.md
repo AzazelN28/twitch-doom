@@ -1,5 +1,42 @@
 # Twitch DOOM
 
+## Installation
+
+### GStreamer
+
+```sh
+sudo apt install curl gstreamer-1.0 gstreamer-* xwininfo -y
+```
+
+### Node.js
+
+You have two options
+
+```sh
+
+```
+
+
+## Chat Commands
+
+- `!h`,`!help`: Show help
+- `!f`,`!forward`: Move forward
+- `!b`,`!backward`: Move backward 
+- `!l`,`!left`,`!turnleft`: Turn left 
+- `!r`,`!right`,`!turnright`: Turn right 
+- `!sl`,`!strafeleft`: Strafe left
+- `!sr`,`!straferight`: Strafe right 
+- `!s`,`!shoot`,`!fire`: Shoot
+- `!u`,`!use`: Use 
+- `!a`,`!m`,`!map`,`!automap`: Automap
+- `!1`,`!fist`: Fist 
+- `!2`,`!pistol`: Pistol 
+- `!3`,`!shotgun`: Shotgun 
+- `!4`,`!chaingun`: Chaingun 
+- `!5`,`!rocket`: Rocket 
+- `!6`,`!plasma`: Plasma 
+- `!7`,`!bfg`: BFG9000 
+
 ## How it works?
 
 I've created a modified version of [chocolate-doom](https://github.com/chocolate-doom/chocolate-doom) without the basic menu options (I've removed them from `chocolate-doom/src/doom/d_menu.c`) and with a UDP socket that can receive new `event_t` and post them with `D_PostEvent`. All this code is located in `chocolate-doom/src/twitchdoom.c` and `chocolate-doom/src/twitchdoom.h`.
@@ -139,5 +176,9 @@ typedef enum
     ev_quit
 } evtype_t;
 ```
+
+## Special thanks to
+
+- [WhatAboutGamingLive](https://www.twitch.tv/whataboutgaminglive)
 
 Made with :heart: by [AzazelN28](https://github.com/AzazelN28)

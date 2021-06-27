@@ -2,6 +2,11 @@ import cp from 'child_process'
 import events, { EventType, JoystickAxis, JoystickButton } from './doom/events'
 import loop from './doom/loop'
 
+/**
+ * Doom Weapons
+ * @readonly
+ * @enum {number}
+ */
 export const Weapon = {
   FIST: 0,
   PISTOL: 1,
@@ -12,19 +17,34 @@ export const Weapon = {
   BFG: 6
 }
 
+/**
+ * Starts the modified version of chocolate doom
+ * @returns {ChildProcess}
+ */
 export function start() {
-  const doom = cp.spawn('./bin/doom', ['-iwad', './bin/doom1.wad'], {
+  const doom = cp.spawn('./bin/doom', [
+    '-iwad', 
+    './bin/doom1.wad'
+  ], {
     stdio: process.env.TWITCH_DOOM_DEBUG_STDIO ? 'inherit' : null
   })
   return doom
 }
 
+/**
+ * Initialize UDP input communication loop.
+ */
 export function init() {
   return loop.start()
 }
 
+/**
+ * Reset game.
+ */
 export function reset() {
+  events.createAndQueue(EventType.KEY_DOWN, 0x80 + 0x41)
   events.createAndQueue(EventType.KEY_UP, 0x80 + 0x41)
+  events.createAndQueue(EventType.KEY_DOWN, 0x79)
   events.createAndQueue(EventType.KEY_UP, 0x79)
 }
 
@@ -61,15 +81,16 @@ export function use() {
 }
 
 export function automap() {
-  return events.createAndQueue(EventType.KEY_UP, 0x09)
+  events.createAndQueue(EventType.KEY_DOWN, 0x09)
+  events.createAndQueue(EventType.KEY_UP, 0x09)
 }
 
 export function weapon(id) {
-  return events.createAndQueue(EventType.KEY_UP, 0x31 + id)
+  events.createAndQueue(EventType.KEY_DOWN, 0x31 + id)
+  events.createAndQueue(EventType.KEY_UP, 0x31 + id)
 }
 
 export function cheat(text) {
-  // TBI: To Be Implemented
   return null
 }
 

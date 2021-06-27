@@ -1,7 +1,25 @@
+import cp from 'child_process'
 import debug from 'debug'
 
 const log = debug('twitchdoom:xwininfo')
 
+/**
+ * XWinInfo rectangle information.
+ * 
+ * > IMPORTANT: Depending on the X window system used maybe you'll need to adjust these coordinates manually.
+ *
+ * @typedef {Object} XWinInfoRect
+ * @property {number} x
+ * @property {number} y
+ * @property {number} width
+ * @property {number} height
+ */
+
+/**
+ * Retrieves X window coordinates and size.
+ * @param {string} [name='DOOM Shareware - Chocolate Doom 3.0.0']
+ * @returns {Promise<XWinInfoRect>}
+ */
 export function getInfo(name = 'DOOM Shareware - Chocolate Doom 3.0.0') {
   return new Promise((resolve, reject) => {
     log('Executing xwininfo')
