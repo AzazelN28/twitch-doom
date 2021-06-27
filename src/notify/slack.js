@@ -1,8 +1,10 @@
+import fetch from 'node-fetch'
+
 /**
- *
+ * Envia
  *
  */
-async function postSlack(data) {
+export async function notify(data) {
   const response = await fetch(process.env.TWITCH_DOOM_SLACK_WEBHOOK, {
     method: 'POST',
     headers: {
@@ -13,3 +15,6 @@ async function postSlack(data) {
   return response.json()
 }
 
+export default {
+  notify
+}

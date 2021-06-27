@@ -1,0 +1,33 @@
+digraph {
+
+  graph [
+    splines=ortho
+    fontsize=20
+    labelloc=t
+    label="Twitch DOOM"
+    pad=1
+    nodesep=1
+  ]
+
+  node [shape=box]
+
+  nodejs [label="Node.js"]
+  twitch_client [label="Twitch Client\n(tmi.js)"]
+  udp_socket [label="UDP Socket"]
+  doom [label="DOOM"]
+  gstreamer [label="GStreamer"]
+  xwininfo [label="xwininfo"]
+  twitch_rtmp [label="Twitch RTMP"]
+
+  nodejs -> udp_socket [label="event_t\n(Int32Array)"]
+  nodejs -> twitch_client [label="Twitch API" dir=both]
+  nodejs -> xwininfo [label="cp.exec" style=dashed]
+  xwininfo -> nodejs [label="stdout" style=dashed]
+
+  nodejs -> gstreamer [label="cp.spawn" style=dashed]
+  nodejs -> doom [label="cp.spawn" style=dashed]
+
+  udp_socket -> doom [label="event_t"]
+  gstreamer -> twitch_rtmp [label="RTMP"]
+
+}
