@@ -49,15 +49,15 @@ export function reset() {
 }
 
 export function forward(amount = 1) {
-  events.createAndQueueAmount(EventType.JOYSTICK,0,0,JoystickAxis.POSITIVE,0,0)
+  events.createAndQueueAmount(amount, EventType.JOYSTICK,0,0,JoystickAxis.POSITIVE,0,0)
 }
 
 export function backward(amount = 1) {
-  events.createAndQueueAmount(EventType.JOYSTICK,0,0,JoystickAxis.NEGATIVE,0,0)
+  events.createAndQueueAmount(amount, EventType.JOYSTICK,0,0,JoystickAxis.NEGATIVE,0,0)
 }
 
 export function turnLeft(amount = 1) {
-  events.createAndQueueAmount(EventType.JOYSTICK,0,JoystickAxis.POSITIVE,0,0)
+  events.createAndQueueAmount(amount, EventType.JOYSTICK,0,JoystickAxis.POSITIVE,0,0)
 }
 
 export function turnRight(amount = 1) {

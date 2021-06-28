@@ -46,7 +46,7 @@ export function start({ x, y, width, height, location }) {
     ! x264enc
         bitrate=1600
         key-int-max=60
-        speed-preset=1
+        speed-preset=3
         tune=zerolatency
     ! video/x-h264,profile=main
     ! mux.
@@ -59,7 +59,8 @@ export function start({ x, y, width, height, location }) {
     ! mux.
     `.split(/\s+/g)
 
-  log('Gstreamer', 'gst-launch-1.0', '-v', ...gstreamerPipeline)
+  // Be careful, this can leak stream keys.
+  // log('Gstreamer', 'gst-launch-1.0', '-v', ...gstreamerPipeline)
 
   const gstreamer = cp.spawn('gst-launch-1.0', ['-v', ...gstreamerPipeline], {
     stdio: process.env.TWITCH_DOOM_DEBUG_STDIO ? 'inherit' : null
