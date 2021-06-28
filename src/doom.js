@@ -48,36 +48,40 @@ export function reset() {
   events.createAndQueue(EventType.KEY_UP, 0x79)
 }
 
-export function forward(amount) {
-  return events.createAndQueue(EventType.JOYSTICK,0,0,JoystickAxis.POSITIVE,0,0)
+export function forward(amount = 1) {
+  events.createAndQueueAmount(EventType.JOYSTICK,0,0,JoystickAxis.POSITIVE,0,0)
 }
 
-export function backward(amount) {
-  return events.createAndQueue(EventType.JOYSTICK,0,0,JoystickAxis.NEGATIVE,0,0)
+export function backward(amount = 1) {
+  events.createAndQueueAmount(EventType.JOYSTICK,0,0,JoystickAxis.NEGATIVE,0,0)
 }
 
-export function turnLeft(amount) {
-  return events.createAndQueue(EventType.JOYSTICK,0,JoystickAxis.POSITIVE,0,0)
+export function turnLeft(amount = 1) {
+  events.createAndQueueAmount(EventType.JOYSTICK,0,JoystickAxis.POSITIVE,0,0)
 }
 
-export function turnRight(amount) {
-  return events.createAndQueue(EventType.JOYSTICK,0,JoystickAxis.NEGATIVE,0,0)
+export function turnRight(amount = 1) {
+  events.createAndQueueAmount(amount, EventType.JOYSTICK,0,JoystickAxis.NEGATIVE,0,0)
 }
 
-export function strafeLeft(amount) {
-  return events.createAndQueue(EventType.JOYSTICK,0,0,0,JoystickAxis.POSITIVE,0)
+export function strafeLeft(amount = 1) {
+  events.createAndQueueAmount(amount, EventType.JOYSTICK,0,0,0,JoystickAxis.POSITIVE,0)
 }
 
-export function strafeRight(amount) {
-  return events.createAndQueue(EventType.JOYSTICK,0,0,0,JoystickAxis.NEGATIVE,0)
+export function strafeRight(amount = 1) {
+  events.createAndQueueAmount(amount, EventType.JOYSTICK,0,0,0,JoystickAxis.NEGATIVE,0)
 }
 
-export function shoot() {
-  return events.createAndQueue(EventType.JOYSTICK,JoystickButton.A)
+export function shoot(amount = 1) {
+  events.createAndQueueAmount(amount, EventType.JOYSTICK,JoystickButton.A)
 }
 
-export function use() {
-  return events.createAndQueue(EventType.JOYSTICK,JoystickButton.B)
+export function use(amount = 1) {
+  //return events.createAndQueue(EventType.JOYSTICK,JoystickButton.X)
+  for (let i = 0; i < amount; i++) {
+    events.createAndQueue(EventType.KEY_DOWN, 0x20)
+    events.createAndQueue(EventType.KEY_UP, 0x20)
+  }
 }
 
 export function automap() {

@@ -38,14 +38,14 @@ export default function main() {
     const commandName = msg.trim().toLowerCase()
     const commandList = [
       '!h', '!help',
-      '!f', '!forward',
-      '!b', '!backward',
+      '!f', '!forward', '!up',
+      '!b', '!backward', '!down', '!dn',
       '!l', '!tl', '!left', '!turnleft',
       '!r', '!tr', '!right', '!turnright',
       '!sl', '!strafeleft',
       '!sr', '!straferight',
-      '!s', '!shoot', '!fire',
-      '!u', '!use',
+      '!s', '!shoot', '!shot', '!fire',
+      '!u', '!use', '!o', '!open',
       '!a', '!m', '!map', '!automap',
       '!1', '!fist',
       '!2', '!pistol',
@@ -68,14 +68,14 @@ export default function main() {
       // data5: Fourth axis mouse movement (look)
       switch (commandName) {
         case '!h': case '!help': return client.say(channel, `@${tags.username} to move you can use !forward, !backward, !turnleft, !turnright, !strafeleft, !straferight or its shortcut version: !f, !b, !l, !r, !sl, !sr, to shoot use !shoot (or !s or !fire) and to use !use (or !u). You can change weapon with numbers !1,!2,!3,!4,!5,!6,!7 or by its name: !fist, !pistol, !shotgun, !chaingun, !rocket, !plasma or !bfg.`)
-        case '!f': case '!forward': return doom.forward()
-        case '!b': case '!backward': return doom.backward()
+        case '!f': case '!forward': case '!up': return doom.forward()
+        case '!b': case '!backward': case '!down': case '!dn': return doom.backward()
         case '!l': case '!tl': case '!left': case '!turnleft': return doom.turnLeft()
         case '!r': case '!tr': case '!right': case '!turnright': return doom.turnRight()
         case '!sl': case '!strafeleft': return doom.strafeLeft()
         case '!sr': case '!straferight': return doom.strafeRight()
         case '!s': case '!shoot': case '!fire': return doom.shoot()
-        case '!u': case '!use': return doom.use()
+        case '!u': case '!use': case '!o': case '!open': return doom.use()
         case '!a': case '!m': case '!map': case '!automap': return doom.automap()
         case '!1': case '!fist': return doom.weapon(doom.Weapon.FIST)
         case '!2': case '!pistol': return doom.weapon(doom.Weapon.PISTOL)
@@ -90,7 +90,29 @@ export default function main() {
           break
       }
     } else {
-      // TODO: Podemos intentar parsear cosas como !f25
+      if (commandName.length > 1) {
+        const actions = commandName.split(/[+\-.,;:> ]+/g).map((part) => {
+          const matches = part.match(/(f(?:orward)?|b(?:ackward)?|l(?:eft)?|r(?:ight)?|t(?:urn)?(?:l(?:eft)?|r(?:ight)?)|s(?:trafe)?(?:l(?:eft)?|r(?:ight)?)|s(?:hoot)?|u(?:se)?|o(?:pen)?)([1-9]{1})?/)
+          if (matches) {
+            const [, action, amountAsString] = matches
+            return [action, parseInt(amountAsString || '1', 10)]
+          }
+        }).filter((part) => part).slice(0, 5)
+        for (const [action, amount] of actions) {
+          switch (action) {
+            case 'f': return doom.forward(amount)
+            case 'b': return doom.backward(amount)
+            case 'l': case 'tl': return doom.turnLeft(amount)
+            case 'r': case 'tr': return doom.turnRight(amount)
+            case 'sl': return doom.strafeLeft(amount)
+            case 'sr': return doom.strafeRight(amount)
+            case 's': return doom.shoot(amount)
+            case 'u': return doom.use(amount)
+            default: 
+              console.log(action, amount)
+          }   
+        }
+      }
     }
   })
 

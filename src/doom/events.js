@@ -24,7 +24,7 @@ export const EventType = {
 
 const MAX_EVENTS = process.env.TWITCH_DOOM_MAX_EVENTS
   ? parseInt(process.env.TWITCH_DOOM_MAX_EVENTS, 10)
-  : 60
+  : 50
 
 const events = []
 
@@ -46,6 +46,12 @@ export function createAndQueue(type, ...data) {
   return queue(create(type, ...data))
 }
 
+export function createAndQueueAmount(amount, type, ...data) {
+  for (let i = 0; i < amount; i++) {
+    createAndQueue(type, ...data)
+  }
+}
+
 export default {
   JoystickAxis,
   JoystickButton,
@@ -62,5 +68,6 @@ export default {
   deque,
   queue,
   create,
-  createAndQueue
+  createAndQueue,
+  createAndQueueAmount
 }
